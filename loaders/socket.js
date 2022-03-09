@@ -7,7 +7,6 @@ const lobbyManager = new LobbyManager();
 const roomManager = new Roomanager(io);
 
 module.exports = ({ app }) => {
-  const players = {};
   let userState = {};
 
   io.on("connect", (socket) => {
@@ -35,12 +34,6 @@ module.exports = ({ app }) => {
 
       userState[socket.id] = { name, isReady };
 
-      if (!roomInfo) {
-        socket.emit("errorMessage", {
-          message: "플레이 할 상대방이 없습니다.",
-        });
-      }
-
       if (Object.keys(userState).length > 1) {
         roomInfo?.players.map((player) => {
           player.name = userState[player.id].name;
@@ -57,6 +50,15 @@ module.exports = ({ app }) => {
       const isAllReady = !roomInfo?.players.some((player) => {
         return !player.isReady;
       });
+      let playersNameList = [];
+
+      if (isAllReady) {
+        playersNameList = roomInfo?.players.map((player) => {
+          return player.name;
+        });
+
+        io.to(roomInfo?.roomNumber).emit("sendPlayersNameList", { playersNameList });
+      }
 
       io.to(roomInfo?.roomNumber).emit("isAllReadyCheck", { isAllReady });
     });
@@ -81,6 +83,13 @@ module.exports = ({ app }) => {
       roomInfo.isGameOver = true;
 
       io.to(roomInfo.roomNumber).emit("gameOver", { isGameOver: roomInfo.isGameOver });
+    });
+
+    socket.on("resetObjects", () => {
+      const roomIndex = roomManager.findRoomIndex(socket);
+      const roomInfo = roomManager?.rooms[roomIndex];
+
+      io.to(roomInfo.roomNumber).emit("resetObjects");
     });
 
     socket.on("disconnect", () => {

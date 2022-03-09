@@ -8,8 +8,6 @@ function RoomManager(io) {
     player1Socket.join(roomNumber);
     player2Socket.join(roomNumber);
 
-    // io.to(roomNumber).emit("loadPlayer", { players: room });
-
     this.rooms.push(room);
     console.log("Room Created : ", roomNumber);
   };
@@ -51,7 +49,7 @@ function Room(roomNumber, player1Socket, player2Socket) {
   this.objects[player2Socket.id].id = player2Socket.id;
   this.objects[player2Socket.id].side = "player2";
   this.objects[player2Socket.id].isReady = false;
-  this.objects[player1Socket.id].name = "";
+  this.objects[player2Socket.id].name = "";
 
   this.objects.ball = {};
   this.objects.ball.id = roomNumber;
