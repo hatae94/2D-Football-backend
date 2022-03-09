@@ -65,8 +65,9 @@ module.exports = ({ app }) => {
 
     socket.on("movePlayer", ({ x, y, anims, time }) => {
       const serverTime = new Date();
+      const { roomNumber } = roomManager.rooms[roomManager.findRoomIndex(socket)];
 
-      socket.broadcast.emit("otherPlayerMove", { x, y, anims, id: socket.id, serverTime });
+      io.to(roomNumber).emit("otherPlayerMove", { x, y, anims, id: socket.id, serverTime });
     });
 
     socket.on("moveBall", ({ x, y, anims, id, possession, time }) => {
