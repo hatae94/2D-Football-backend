@@ -7,8 +7,6 @@ module.exports = ({ app, routerLoader }) => {
   app.use(express.urlencoded({ extended: false }));
   app.use(cookieParser());
 
-  // routerLoader({ app });
-
   app.use((req, res, next) => {
     next(createError(404));
   });
