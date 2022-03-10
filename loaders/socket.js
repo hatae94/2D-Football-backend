@@ -10,8 +10,6 @@ module.exports = ({ app }) => {
   let userState = {};
 
   io.on("connect", (socket) => {
-    console.log("socket connected : ", socket.id);
-
     socket.on("makeRoom", () => {
       lobbyManager.push(socket);
       lobbyManager.dispatch(roomManager);
@@ -20,12 +18,11 @@ module.exports = ({ app }) => {
     socket.on("joinRoom", () => {
       const roomIndex = roomManager.findRoomIndex(socket);
       const roomInfo = roomManager?.rooms[roomIndex];
+      const roomNumber = roomInfo?.roomNumber;
 
-      if (roomInfo) {
-        socket.emit("loadPlayer", { roomInfo: roomInfo?.objects });
+      io.to(roomNumber).emit("loadPlayer", { roomInfo: roomInfo?.objects });
 
-        userState = {};
-      }
+      userState = {};
     });
 
     socket.on("setUserState", ({ name, isReady }) => {
@@ -47,6 +44,7 @@ module.exports = ({ app }) => {
     socket.on("checkIsAllReady", () => {
       const roomIndex = roomManager.findRoomIndex(socket);
       const roomInfo = roomManager?.rooms[roomIndex];
+      const roomNumber = roomInfo?.roomNumber;
       const isAllReady = !roomInfo?.players.some((player) => {
         return !player.isReady;
       });
@@ -57,44 +55,50 @@ module.exports = ({ app }) => {
           return player.name;
         });
 
-        io.to(roomInfo?.roomNumber).emit("sendPlayersNameList", { playersNameList });
+        io.to(roomNumber).emit("sendPlayersNameList", { playersNameList });
       }
 
       io.to(roomInfo?.roomNumber).emit("isAllReadyCheck", { isAllReady });
     });
 
-    socket.on("movePlayer", ({ x, y, anims, time }) => {
-      const serverTime = new Date();
-      const { roomNumber } = roomManager.rooms[roomManager.findRoomIndex(socket)];
+    socket.on("movePlayer", ({ x, y, anims }) => {
+      const roomIndex = roomManager.findRoomIndex(socket);
+      const roomInfo = roomManager?.rooms[roomIndex];
+      const roomNumber = roomInfo?.roomNumber;
 
-      io.to(roomNumber).emit("otherPlayerMove", { x, y, anims, id: socket.id, serverTime });
+      io.to(roomNumber).emit("otherPlayerMove", { x, y, anims, id: socket.id });
     });
 
-    socket.on("moveBall", ({ x, y, anims, id, possession, time }) => {
-      const serverTime = new Date();
-      const { roomNumber } = roomManager.rooms[roomManager.findRoomIndex(socket)];
+    socket.on("moveBall", ({ x, y, possession }) => {
+      const roomIndex = roomManager.findRoomIndex(socket);
+      const roomInfo = roomManager?.rooms[roomIndex];
+      const roomNumber = roomInfo?.roomNumber;
 
-      io.to(roomNumber).emit("ballMove", { x, y, anims, id, possession, serverTime });
+      io.to(roomNumber).emit("ballMove", { x, y, possession });
     });
 
     socket.on("setGameOver", () => {
       const roomIndex = roomManager.findRoomIndex(socket);
       const roomInfo = roomManager?.rooms[roomIndex];
+      const roomNumber = roomInfo?.roomNumber;
 
       roomInfo.isGameOver = true;
 
-      io.to(roomInfo.roomNumber).emit("gameOver", { isGameOver: roomInfo.isGameOver });
+      io.to(roomNumber).emit("gameOver", { isGameOver: roomInfo.isGameOver });
     });
 
     socket.on("resetObjects", () => {
       const roomIndex = roomManager.findRoomIndex(socket);
       const roomInfo = roomManager?.rooms[roomIndex];
+      const roomNumber = roomInfo?.roomNumber;
 
-      io.to(roomInfo.roomNumber).emit("resetObjects");
+      io.to(roomNumber).emit("resetObjects");
     });
 
     socket.on("disconnect", () => {
       const roomIndex = roomManager.findRoomIndex(socket);
+      const roomInfo = roomManager?.rooms[roomIndex];
+      const roomNumber = roomInfo?.roomNumber;
 
       if (roomIndex !== -1) {
         userState = roomManager.rooms[roomIndex].players.filter(
@@ -107,7 +111,7 @@ module.exports = ({ app }) => {
 
       lobbyManager.leave(socket);
 
-      console.log(`Goodbye ${socket.id}`);
+      io.to(roomNumber).emit("someUserDisconnected", { message: "유저가 강제 종료하였습니다.." });
     });
   });
 

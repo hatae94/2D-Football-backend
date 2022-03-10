@@ -4,7 +4,6 @@ function LobbyManager() {
 
   this.push = function (socket) {
     this.lobby.push(socket);
-    console.log("push length", this.lobby.length);
   };
 
   this.leave = function (socket) {
@@ -22,7 +21,6 @@ function LobbyManager() {
   };
 
   this.dispatch = function (RoomManager) {
-    console.log("length", this.lobby.length);
     if (this.dispatching) {
       return;
     }

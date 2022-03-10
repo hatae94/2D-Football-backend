@@ -9,7 +9,6 @@ function RoomManager(io) {
     player2Socket.join(roomNumber);
 
     this.rooms.push(room);
-    console.log("Room Created : ", roomNumber);
   };
 
   this.findRoomIndex = function (socket) {
