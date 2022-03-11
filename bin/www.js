@@ -43,6 +43,7 @@ server.on("listening", onListening);
 app.io.attach(server, {
   cors: {
     secure: true,
+    credential: true,
     origin: socketClientURL,
     transports: ["websocket"],
   },
