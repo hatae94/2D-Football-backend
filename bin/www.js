@@ -41,6 +41,7 @@ server.on("error", onError);
 server.on("listening", onListening);
 
 app.io.attach(server, {
+  path: "/socket.io",
   cors: {
     secure: true,
     credential: true,
