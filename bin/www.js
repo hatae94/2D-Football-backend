@@ -45,6 +45,7 @@ app.io.attach(server, {
     secure: true,
     credential: true,
     origin: socketClientURL,
+    methods: ["GET", "POST"],
     transports: ["websocket"],
   },
 });
