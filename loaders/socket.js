@@ -88,11 +88,7 @@ module.exports = ({ app }) => {
     });
 
     socket.on("resetObjects", () => {
-      const roomIndex = roomManager.findRoomIndex(socket);
-      const roomInfo = roomManager?.rooms[roomIndex];
-      const roomNumber = roomInfo?.roomNumber;
-
-      io.to(roomNumber).emit("resetObjects");
+      socket.emit("resetGameObjects", {});
     });
 
     socket.on("disconnect", () => {
