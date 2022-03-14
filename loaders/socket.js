@@ -69,12 +69,12 @@ module.exports = ({ app }) => {
       io.to(roomNumber).emit("otherPlayerMove", { x, y, anims, id: socket.id });
     });
 
-    socket.on("moveBall", ({ x, y, possession }) => {
+    socket.on("moveBall", ({ x, y, possession, isShoot }) => {
       const roomIndex = roomManager.findRoomIndex(socket);
       const roomInfo = roomManager?.rooms[roomIndex];
       const roomNumber = roomInfo?.roomNumber;
 
-      io.to(roomNumber).emit("ballMove", { x, y, possession });
+      io.to(roomNumber).emit("ballMove", { x, y, possession, isShoot });
     });
 
     socket.on("setGameOver", () => {
